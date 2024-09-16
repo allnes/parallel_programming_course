@@ -24,7 +24,7 @@ class TestTask : public ppc::core::Task {
     internal_order_test();
     input_ = reinterpret_cast<T *>(taskData->inputs[0]);
     output_ = reinterpret_cast<T *>(taskData->outputs[0]);
-    output_[0] = 0;
+    output_[0] = static_cast<T>(0);
     return true;
   }
 

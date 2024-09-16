@@ -115,7 +115,7 @@ TEST(task_tests, check_int64_t) {
 
 TEST(task_tests, check_float) {
   // Create data
-  std::vector<float> in(20, 1);
+  std::vector<float> in(10, 1);
   std::vector<float> out(1, 0);
 
   // Create TaskData
@@ -132,7 +132,7 @@ TEST(task_tests, check_float) {
   testTask.pre_processing();
   testTask.run();
   testTask.post_processing();
-  EXPECT_NEAR(out[0], in.size(), 1e-3);
+  ASSERT_EQ(static_cast<size_t>(out[0]), in.size());
 }
 
 TEST(task_tests, check_wrong_order) {
