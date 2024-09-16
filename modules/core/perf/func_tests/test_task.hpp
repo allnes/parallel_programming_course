@@ -7,6 +7,7 @@
 
 #include <memory>
 #include <vector>
+#include <thread>
 
 #include "core/task/include/task.hpp"
 
