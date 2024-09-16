@@ -24,7 +24,6 @@ class TestTask : public ppc::core::Task {
     internal_order_test();
     input_ = reinterpret_cast<T *>(taskData->inputs[0]);
     output_ = reinterpret_cast<T *>(taskData->outputs[0]);
-    output_[0] = static_cast<T>(0);
     return true;
   }
 
@@ -35,9 +34,13 @@ class TestTask : public ppc::core::Task {
 
   bool run() override {
     internal_order_test();
-    for (unsigned i = 0; i < taskData->inputs_count[0]; i++) {
-      output_[0] += input_[i];
+
+    T sum = static_cast<T>(0);
+    for (std::uint32_t i = 0; i < taskData->inputs_count[0]; i++) {
+      sum = sum + input_[i];
     }
+    output_[0] = sum;
+
     if (pause) {
       std::this_thread::sleep_for(20ms);
     }
