@@ -83,8 +83,8 @@ void ppc::core::Perf::print_perf_statistic(const std::shared_ptr<PerfResults>& p
     std::cout << relative_path << ":" << type_test_name << ":" << perf_res_str.str() << std::endl;
   } else {
     std::string error_str_s = "Task execute time need to be: ";
-    error_str_s +=
-      std::to_string(PerfResults::MIN_TIME) + " secs. < time < " + std::to_string(PerfResults::MAX_TIME) + " secs.\n";
+    error_str_s += std::to_string(PerfResults::MIN_TIME) + " secs. < time < ";
+    error_str_s += std::to_string(PerfResults::MAX_TIME) + " secs.\n";
     error_str_s += "Original time in secs: " + std::to_string(time_secs);
     perf_res_str << std::fixed << std::setprecision(10) << -1.0;
     std::cout << relative_path << ":" << type_test_name << ":" << perf_res_str.str() << std::endl;
