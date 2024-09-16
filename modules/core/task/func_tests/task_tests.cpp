@@ -75,19 +75,20 @@ TEST(task_tests, check_uint8_t) {
 
   // Create TaskData
   std::shared_ptr<ppc::core::TaskData> taskData = std::make_shared<ppc::core::TaskData>();
-  taskData->inputs.emplace_back(reinterpret_cast<uint8_t *>(in.data()));
+  taskData->inputs.emplace_back(in.data());
   taskData->inputs_count.emplace_back(in.size());
-  taskData->outputs.emplace_back(reinterpret_cast<uint8_t *>(out.data()));
+  taskData->outputs.emplace_back(out.data());
   taskData->outputs_count.emplace_back(out.size());
 
   // Create Task
-  ppc::test::TestTask<uint8_t> testTask(taskData);
-  bool isValid = testTask.validation();
+  auto testTask = std::make_shared<ppc::test::TestTask<uint8_t>>(taskData);
+  bool isValid = testTask->validation();
   ASSERT_EQ(isValid, true);
-  testTask.pre_processing();
-  testTask.run();
-  testTask.post_processing();
-  ASSERT_EQ(static_cast<size_t>(out[0]), in.size());
+
+  testTask->pre_processing();
+  testTask->run();
+  testTask->post_processing();
+  ASSERT_EQ(out[0], static_cast<uint8_t>(in.size()));
 }
 
 TEST(task_tests, check_int64_t) {
