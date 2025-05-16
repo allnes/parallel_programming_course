@@ -110,7 +110,7 @@ class PPCRunner:
             gtest_command_mpi_test = f"{self.work_dir / 'mpi_func_tests'} {self.__get_gtest_settings(10)}"
             if os.environ.get("MPI_COVERAGE"):
                 gcov_prefix = os.environ.get("GCOV_PREFIX")
-                exec_prefix = f"GCOV_PREFIX={gcov_prefix}/proc_$MPI_RANK; mkdir -p $GCOV_PREFIX; exec"
+                exec_prefix = f"GCOV_PREFIX={gcov_prefix}/proc_$OMPI_COMM_WORLD_RANK; mkdir -p $GCOV_PREFIX; exec"
                 self.__run_exec(f"{mpi_running} bash -c \'{exec_prefix} {gtest_command_all_test}\'")
                 self.__run_exec(f"{mpi_running} bash -c \'{exec_prefix} {gtest_command_mpi_test}\'")
             else:
