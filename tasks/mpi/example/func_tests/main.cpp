@@ -47,12 +47,7 @@ TEST_P(NesterovATestTaskMPI, MultiplyRowMajorUtilTestFromFile) {
   const size_t count = GetCount();
 
   std::vector<int> in(count * count, 0);
-  for (size_t i = 0; i < count; ++i) {
-    in[(i * count) + i] = 1;
-  }
-
-  std::vector<int> out(count * count, 0);
-  nesterov_a_test_task_mpi::MultiplyRowMajor(in, out, static_cast<int>(count));
+  for (size_t i = 0; i < count; ++i) { in[(i * count) + i] = 1; } std::vector<int> out(count * count, 0); nesterov_a_test_task_mpi::MultiplyRowMajor(in, out, static_cast<int>(count));
 
   EXPECT_EQ(in, out);
 }
