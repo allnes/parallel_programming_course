@@ -961,7 +961,7 @@ jobs:
       - name: Run tests (MPI)
         run: |
           mkdir -p $GCOV_PREFIX
-          python3 scripts/run_tests.py --running-type="processes" --additional-mpi-args="--oversubscribe"
+          python3 scripts/run_tests.py --running-type="processes"
           find gcov_mpi -name '*.gcda' -exec cp --parents {} build/ \;
         env:
           PROC_COUNT: 2
