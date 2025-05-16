@@ -109,13 +109,13 @@ class PPCRunner:
             gtest_command_all_test = f"{self.work_dir / 'all_func_tests'} {self.__get_gtest_settings(10)}"
             gtest_command_mpi_test = f"{self.work_dir / 'mpi_func_tests'} {self.__get_gtest_settings(10)}"
             if os.environ.get("MPI_COVERAGE"):
-                self.__run_exec(f"{mpi_running} {gtest_command_all_test}")
-                self.__run_exec(f"{mpi_running} {gtest_command_mpi_test}")
-            else:
                 gcov_prefix = os.environ.get("GCOV_PREFIX")
                 exec_prefix = f"GCOV_PREFIX={gcov_prefix}/proc_$MPI_RANK; mkdir -p $GCOV_PREFIX; exec"
                 self.__run_exec(f"{mpi_running} bash -c \'{exec_prefix} {gtest_command_all_test}\'")
                 self.__run_exec(f"{mpi_running} bash -c \'{exec_prefix} {gtest_command_mpi_test}\'")
+            else:
+                self.__run_exec(f"{mpi_running} {gtest_command_all_test}")
+                self.__run_exec(f"{mpi_running} {gtest_command_mpi_test}")
 
     def run_performance(self):
         if not os.environ.get("ASAN_RUN"):
