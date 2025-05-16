@@ -13,3 +13,4 @@ CMakeSettings.json
 .DS_Store
 .cache
 install
+gcov_mpi

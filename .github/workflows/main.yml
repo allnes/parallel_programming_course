@@ -926,10 +926,10 @@ jobs:
           OMP_NUM_THREADS: 13
           CLANG_BUILD: 1
   ubuntu-gcc-build-codecov:
-    needs:
-      - ubuntu-gcc-test-extended
-      - ubuntu-clang-test-extended
-      - macos-clang-test-extended
+#    needs:
+#      - ubuntu-gcc-test-extended
+#      - ubuntu-clang-test-extended
+#      - macos-clang-test-extended
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -959,10 +959,16 @@ jobs:
         run: |
           cmake --build build --parallel
       - name: Run tests (MPI)
-        run: python3 scripts/run_tests.py --running-type="processes"
+        run: |
+          mkdir -p $GCOV_PREFIX
+          python3 scripts/run_tests.py --running-type="processes" --additional-mpi-args="--oversubscribe"
+          find gcov_mpi -name '*.gcda' -exec cp --parents {} build/ \;
         env:
           PROC_COUNT: 2
           OMP_NUM_THREADS: 2
+          GCOV_PREFIX: gcov_mpi
+          GCOV_PREFIX_STRIP: 0
+          MPI_COVERAGE: 1
       - name: Run tests (threads, num_threads=1)
         run: python3 scripts/run_tests.py --running-type="threads"
         env:
