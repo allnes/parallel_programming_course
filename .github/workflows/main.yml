@@ -962,6 +962,7 @@ jobs:
         run: |
           mkdir -p $GCOV_PREFIX
           python3 scripts/run_tests.py --running-type="processes"
+          find gcov_mpi -name '*.gcda' -print
           find gcov_mpi -name '*.gcda' -exec cp --parents {} build/ \;
         env:
           PROC_COUNT: 2
@@ -971,7 +972,6 @@ jobs:
           MPI_COVERAGE: 1
       - name: Run tests (threads, num_threads=1)
         run: |
-          echo $GCOV_PREFIX
           python3 scripts/run_tests.py --running-type="threads"
         env:
           OMP_NUM_THREADS: 1
