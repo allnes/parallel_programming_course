@@ -113,6 +113,7 @@ class PPCRunner:
                 exec_prefix = f"GCOV_PREFIX={gcov_prefix}/proc_$OMPI_COMM_WORLD_RANK; mkdir -p $GCOV_PREFIX; exec"
                 self.__run_exec(f"{mpi_running} bash -c \'{exec_prefix} {gtest_command_all_test}\'")
                 self.__run_exec(f"{mpi_running} bash -c \'{exec_prefix} {gtest_command_mpi_test}\'")
+                self.__run_exec(f"{mpi_running} bash -c 'echo $OMPI_COMM_WORLD_RANK'")
             else:
                 self.__run_exec(f"{mpi_running} {gtest_command_all_test}")
                 self.__run_exec(f"{mpi_running} {gtest_command_mpi_test}")
