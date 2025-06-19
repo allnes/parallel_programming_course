@@ -57,6 +57,8 @@ if( MPI_LINK_FLAGS )
 endif( MPI_LINK_FLAGS )
 target_link_libraries(${exec_func_lib} PUBLIC ${MPI_LIBRARIES})
 
+target_include_directories(${exec_func_lib} BEFORE
+        PRIVATE $<IF:$<BOOL:$<TARGET_EXISTS:mpip_lib>>,$<TARGET_PROPERTY:mpip_lib,INTERFACE_INCLUDE_DIRECTORIES>,${MPIP_INSTALL_DIR}/include>)
 
 add_library(stb_image STATIC ${CMAKE_SOURCE_DIR}/3rdparty/stb_image_wrapper.cpp)
 target_include_directories(stb_image PUBLIC ${CMAKE_SOURCE_DIR}/3rdparty/stb)
