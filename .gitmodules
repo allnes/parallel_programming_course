@@ -13,3 +13,6 @@
 [submodule "3rdparty/libenvpp"]
 	path = 3rdparty/libenvpp
 	url = https://github.com/ph3at/libenvpp
+[submodule "3rdparty/microprofile"]
+	path = 3rdparty/microprofile
+	url = https://github.com/jonasmr/microprofile
