@@ -1,4 +1,3 @@
-cmake_minimum_required(VERSION 3.15)
 project(parallel_programming_course LANGUAGES C CXX)
 
 message(STATUS "Student's tasks")
@@ -11,11 +10,6 @@ option(USE_PERF_TESTS "Enable performance tests" OFF)
 set(FUNC_TEST_EXEC ppc_func_tests)
 set(PERF_TEST_EXEC ppc_perf_tests)
 
-# ——— Global compile definitions —————————————————————————————————————
-add_compile_definitions(
-        PATH_TO_PPC_PROJECT="${PROJECT_SOURCE_DIR}"
-)
-
 # ——— Include helper scripts ——————————————————————————————————————
 include(${CMAKE_SOURCE_DIR}/cmake/functions.cmake)
 
@@ -27,9 +21,13 @@ ppc_add_test(${PERF_TEST_EXEC} common/runners/performance.cpp USE_PERF_TESTS)
 set(IMPLEMENTATIONS all mpi omp seq stl tbb)
 
 # ——— Configure each subproject —————————————————————————————————————
-file(GLOB subdirs RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/*")
+file(
+  GLOB subdirs
+  RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}"
+  "${CMAKE_CURRENT_SOURCE_DIR}/*")
 foreach(sub IN LISTS subdirs)
-    if(IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/${sub}" AND NOT sub STREQUAL "common")
-        ppc_configure_subproject(${sub})
-    endif()
+  if(IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/${sub}" AND NOT sub STREQUAL
+                                                           "common")
+    ppc_configure_subproject(${sub})
+  endif()
 endforeach()
