@@ -242,7 +242,7 @@ jobs:
         run: >
           cmake -S . -B build -G Ninja
           -D CMAKE_C_COMPILER_LAUNCHER=ccache -D CMAKE_CXX_COMPILER_LAUNCHER=ccache
-          -D CMAKE_BUILD_TYPE=RELEASE
+          -D CMAKE_BUILD_TYPE=RelWithDebInfo
           -D ENABLE_ADDRESS_SANITIZER=ON -D ENABLE_UB_SANITIZER=ON -D ENABLE_LEAK_SANITIZER=ON
           -D CMAKE_INSTALL_PREFIX=install
         env:
@@ -390,7 +390,18 @@ jobs:
         with:
           files: coverage.xml
       - name: Upload coverage report artifact
+        id: upload-cov
         uses: actions/upload-artifact@v4
         with:
           name: cov-report
           path: 'cov-report'
+      - name: Comment coverage report link
+        # TODO: Support PRs from forks too
+        if: ${{ github.event_name == 'pull_request' && !github.event.pull_request.head.repo.fork }}
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            Coverage report is available for download
+            [here](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
