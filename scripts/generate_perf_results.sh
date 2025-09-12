@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-mkdir -p build/perf_stat_dir
-scripts/run_tests.py --running-type="performance" | tee build/perf_stat_dir/perf_log.txt
-python3 scripts/create_perf_table.py --input build/perf_stat_dir/perf_log.txt --output build/perf_stat_dir
+OUT_DIR="docs/scoreboard/profiles"
+mkdir -p "${OUT_DIR}"
+
+export PPC_PROFILE_OUT="${OUT_DIR}"
+
+# Preserve the same perf binary runs as before
+scripts/run_tests.py --running-type="performance"
+
+echo "Perf runs completed. HTML profiles are in ${OUT_DIR}"

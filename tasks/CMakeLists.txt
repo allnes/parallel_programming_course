@@ -27,3 +27,8 @@ foreach(sub IN LISTS subdirs)
     ppc_configure_subproject(${sub})
   endif()
 endforeach()
+
+# Link microprofile only to performance tests
+if(TARGET ${PERF_TEST_EXEC})
+  target_link_libraries(${PERF_TEST_EXEC} PUBLIC ppc_microprofile)
+endif()

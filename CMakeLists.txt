@@ -6,6 +6,7 @@ endif()
 
 message( STATUS "Parallel Programming Course (PPC)" )
 project(parallel_programming_course)
+option(PPC_ENABLE_PROFILING "Enable microprofile instrumentation (perf tests only)" ON)
 
 ############################ Scoreboard #############################
 
@@ -29,6 +30,7 @@ message( STATUS "PPC step: First configures" )
 include(cmake/configure.cmake)
 include(cmake/modes.cmake)
 include(cmake/sanitizers.cmake)
+include(cmake/ppc_profiler.cmake)
 foreach(dep json libenvpp stb)
     include(cmake/${dep}.cmake)
 endforeach()

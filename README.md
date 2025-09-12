@@ -12,6 +12,8 @@ For more detailed documentation and resources, please visit documentation pages:
 
 Course scoreboard is available [here](https://learning-process.github.io/parallel_programming_course/scoreboard/).
 
+Note: performance CSV tables are deprecated. Microprofile HTML reports are published under `docs/scoreboard/profiles/*.html` with an index at `docs/scoreboard/README.md`.
+
 Coverage report is available [here](https://learning-process.github.io/parallel_programming_course/coverage/).
 
 ### Parallel programming technologies:

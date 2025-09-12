@@ -18,6 +18,10 @@
 #include "task/include/task.hpp"
 #include "util/include/util.hpp"
 
+#if MICROPROFILE_ENABLED
+#include "microprofile.h"
+#endif
+
 namespace ppc::util {
 
 double GetTimeMPI();
@@ -46,6 +50,11 @@ class BaseRunPerfTests : public ::testing::TestWithParam<PerfTestParam<InType, O
   virtual InType GetTestInputData() = 0;
 
   virtual void SetPerfAttributes(ppc::performance::PerfAttr& perf_attrs) {
+#if MICROPROFILE_ENABLED
+    (void)perf_attrs;
+    // Timing is handled by microprofile in perf tests.
+    return;
+#else
     if (task_->GetDynamicTypeOfTask() == ppc::task::TypeOfTask::kMPI ||
         task_->GetDynamicTypeOfTask() == ppc::task::TypeOfTask::kALL) {
       const double t0 = GetTimeMPI();
@@ -65,6 +74,7 @@ class BaseRunPerfTests : public ::testing::TestWithParam<PerfTestParam<InType, O
     } else {
       throw std::runtime_error("The task type is not supported for performance testing.");
     }
+#endif
   }
 
   void ExecuteTest(const PerfTestParam<InType, OutType>& perf_test_param) {
@@ -83,18 +93,42 @@ class BaseRunPerfTests : public ::testing::TestWithParam<PerfTestParam<InType, O
     SetPerfAttributes(perf_attr);
 
     if (mode == ppc::performance::PerfResults::TypeOfRunning::kPipeline) {
+#if MICROPROFILE_ENABLED
+      {
+        MICROPROFILE_SCOPEI("perf", test_name.c_str(), MP_GREEN);
+        perf.PipelineRun(perf_attr);
+      }
+#else
       perf.PipelineRun(perf_attr);
+#endif
     } else if (mode == ppc::performance::PerfResults::TypeOfRunning::kTaskRun) {
+#if MICROPROFILE_ENABLED
+      {
+        MICROPROFILE_SCOPEI("perf", test_name.c_str(), MP_GREEN);
+        perf.TaskRun(perf_attr);
+      }
+#else
       perf.TaskRun(perf_attr);
+#endif
     } else {
       std::stringstream err_msg;
       err_msg << '\n' << "The type of performance check for the task was not selected.\n";
       throw std::runtime_error(err_msg.str().c_str());
     }
 
+#if MICROPROFILE_ENABLED
+    if (GetMPIRank() == 0) {
+      const char* out_dir = std::getenv("PPC_PROFILE_OUT");
+      if (!out_dir) out_dir = "docs/scoreboard/profiles";
+      const std::string capture = test_name + ".html";
+      const std::string out = std::string(out_dir) + "/" + capture;
+      MicroProfileDumpFileImmediately(out.c_str(), capture.c_str(), -1);
+    }
+#else
     if (GetMPIRank() == 0) {
       perf.PrintPerfStatistic(test_name);
     }
+#endif
 
     OutType output_data = task_->GetOutput();
     ASSERT_TRUE(CheckTestOutputData(output_data));

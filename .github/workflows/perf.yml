@@ -30,14 +30,15 @@ jobs:
           PPC_NUM_THREADS: 2
           OMPI_ALLOW_RUN_AS_ROOT: 1
           OMPI_ALLOW_RUN_AS_ROOT_CONFIRM: 1
-      - name: Archive results
-        working-directory: build
-        run: zip -r ../perf-stat.zip perf_stat_dir
-      - name: Upload results
-        uses: actions/upload-artifact@v4
-        with:
-          name: perf-stat
-          path: perf-stat.zip
+      - name: Build scoreboard index
+        run: python3 scripts/scoreboard_index.py
+      - name: Publish profiles
+        run: |
+          git config user.email "ci@users.noreply.github.com"
+          git config user.name  "CI"
+          git add docs/scoreboard
+          git commit -m "Update microprofile reports [ci]" || echo "No changes"
+          git push
   macos-clang-build-perf-stats:
     runs-on: macOS-latest
     steps:
@@ -66,11 +67,12 @@ jobs:
         env:
           PPC_NUM_PROC: 1
           PPC_NUM_THREADS: 2
-      - name: Archive results
-        working-directory: build
-        run: zip -r perf-stat-macos.zip perf_stat_dir
-      - name: Upload results
-        uses: actions/upload-artifact@v4
-        with:
-          name: perf-stat-macos
-          path: perf-stat-macos.zip
+      - name: Build scoreboard index
+        run: python3 scripts/scoreboard_index.py
+      - name: Publish profiles
+        run: |
+          git config user.email "ci@users.noreply.github.com"
+          git config user.name  "CI"
+          git add docs/scoreboard
+          git commit -m "Update microprofile reports [ci]" || echo "No changes"
+          git push
