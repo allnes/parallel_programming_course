@@ -1,4 +1,4 @@
-#include <gtest/gtest.h>
+#include <benchmark/benchmark.h>
 
 #include "example_processes_3/common/include/common.hpp"
 #include "example_processes_3/mpi/include/ops_mpi.hpp"
@@ -6,39 +6,28 @@
 #include "util/include/perf_test_util.hpp"
 
 namespace nesterov_a_test_task_processes_3 {
+namespace {
 
-class ExampleRunPerfTestProcesses3 : public ppc::util::BaseRunPerfTests<InType, OutType> {
-  const int kCount_ = 100;
-  InType input_data_{};
+constexpr int kCount = 100;
 
-  void SetUp() override {
-    input_data_ = kCount_;
-  }
+InType MakeInput() {
+  return kCount;
+}
 
-  bool CheckTestOutputData(OutType &output_data) final {
-    return input_data_ == output_data;
-  }
+bool CheckOutput(const InType &input, const OutType &output) {
+  return input == output;
+}
 
-  InType GetTestInputData() final {
-    return input_data_;
+struct BenchmarkRegistrar {
+  BenchmarkRegistrar() {
+    ppc::util::BenchmarkParams params{};
+    params.iterations = 1;
+    ppc::util::RegisterBenchmarksForTasks<InType, OutType, NesterovATestTaskMPI, NesterovATestTaskSEQ>(
+        PPC_SETTINGS_example_processes_3, MakeInput, CheckOutput, params);
   }
 };
 
-TEST_P(ExampleRunPerfTestProcesses3, RunPerfModes) {
-  ExecuteTest(GetParam());
-}
-
-namespace {
-
-const auto kAllPerfTasks =
-    ppc::util::MakeAllPerfTasks<InType, NesterovATestTaskMPI, NesterovATestTaskSEQ>(PPC_SETTINGS_example_processes_3);
-
-const auto kGtestValues = ppc::util::TupleToGTestValues(kAllPerfTasks);
-
-const auto kPerfTestName = ExampleRunPerfTestProcesses3::CustomPerfTestName;
-
-INSTANTIATE_TEST_SUITE_P(RunModeTests, ExampleRunPerfTestProcesses3, kGtestValues, kPerfTestName);
+const BenchmarkRegistrar kRegistrar{};
 
 }  // namespace
-
 }  // namespace nesterov_a_test_task_processes_3

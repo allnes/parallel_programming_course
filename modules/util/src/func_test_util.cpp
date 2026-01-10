@@ -1,6 +1,6 @@
 #include <mpi.h>
 
-#include "util/include/perf_test_util.hpp"
+#include "util/include/perf_time_util.hpp"
 
 double ppc::util::GetTimeMPI() {
   return MPI_Wtime();

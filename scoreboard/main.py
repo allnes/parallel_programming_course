@@ -56,70 +56,109 @@ def _now_msk():
     return datetime.now()
 
 
-def _read_tasks_type(task_dir: Path) -> str | None:
-    """Read tasks_type from settings.json in the task directory (if present)."""
-    settings_path = task_dir / "settings.json"
-    if settings_path.exists():
-        try:
-            import json
-
-            with open(settings_path, "r") as f:
-                data = json.load(f)
-            return data.get("tasks_type")  # "threads" or "processes"
-        except Exception as e:
-            logger.warning("Failed to parse %s: %s", settings_path, e)
-    return None
-
-
-def _read_task_statuses(task_dir: Path) -> dict[str, str]:
-    """Read per-task-type statuses (enabled/disabled) from settings.json if present."""
-    settings_path = task_dir / "settings.json"
-    if settings_path.exists():
-        try:
-            import json
-
-            with open(settings_path, "r") as f:
-                data = json.load(f)
-            tasks_block = data.get("tasks", {})
-            if isinstance(tasks_block, dict):
-                return {k: str(v) for k, v in tasks_block.items()}
-        except Exception as e:
-            logger.warning("Failed to parse task statuses in %s: %s", settings_path, e)
-    return {}
-
-
 def discover_tasks(tasks_dir, task_types):
     """Discover tasks and their implementation status from the filesystem.
 
     Returns:
         directories: dict[task_name][task_type] -> status
-        tasks_type_map: dict[task_name] -> "threads" | "processes" | None
     """
     directories = defaultdict(dict)
-    tasks_type_map: dict[str, str | None] = {}
 
     if tasks_dir.exists() and tasks_dir.is_dir():
         for task_name_dir in tasks_dir.iterdir():
             if task_name_dir.is_dir() and task_name_dir.name not in ["common"]:
                 task_name = task_name_dir.name
-                # Save tasks_type from settings.json if present
-                tasks_type_map[task_name] = _read_tasks_type(task_name_dir)
-                status_overrides = _read_task_statuses(task_name_dir)
                 for task_type in task_types:
                     task_type_dir = task_name_dir / task_type
                     if task_type_dir.exists() and task_type_dir.is_dir():
                         if task_name.endswith("_disabled"):
                             clean_task_name = task_name[: -len("_disabled")]
                             directories[clean_task_name][task_type] = "disabled"
-                        elif status_overrides.get(task_type) == "disabled":
-                            directories[task_name][task_type] = "disabled"
                         else:
                             directories[task_name][task_type] = "done"
 
-    return directories, tasks_type_map
+    return directories
 
 
-directories, tasks_type_map = discover_tasks(tasks_dir, task_types)
+directories = discover_tasks(tasks_dir, task_types)
+# Filled from benchmark JSON metadata
+tasks_type_map: dict[str, str] = {}
+
+
+def _time_unit_factor(unit: str) -> float:
+    if unit == "ns":
+        return 1e-9
+    if unit == "us":
+        return 1e-6
+    if unit == "ms":
+        return 1e-3
+    if unit == "s":
+        return 1.0
+    return 1.0
+
+
+def load_benchmark_json(
+    perf_json_path: Path, task_hints: list[str] | None = None
+) -> tuple[dict[str, dict], dict[str, str]]:
+    """Parse Google Benchmark JSON into perf map: task -> {impl -> time_sec}.
+
+    Also collects tasks_type from benchmark names.
+    task_hints: optional list of task directory names to improve matching.
+    """
+    if not perf_json_path.exists():
+        return {}, {}
+    try:
+        with open(perf_json_path, "r") as f:
+            data = json.load(f)
+    except Exception as e:
+        logger.warning("Failed to parse benchmark JSON %s: %s", perf_json_path, e)
+        return {}, {}
+
+    benchmarks = data.get("benchmarks", [])
+    perf: dict[str, dict] = {}
+    types: dict[str, str] = {}
+
+    task_hints = task_hints or []
+    impl_tokens = ("seq", "omp", "tbb", "stl", "all", "mpi")
+
+    for bench in benchmarks:
+        name = bench.get("name", "")
+        if not isinstance(name, str):
+            continue
+        name = name.split("/", 1)[0]  # drop JSON appended suffixes
+        if not name.startswith("task_run_"):
+            continue
+        payload = name.removeprefix("task_run_")
+        segments = payload.split(":")
+        if len(segments) < 3:
+            continue
+        tasks_type, task_dir, impl_status = segments[0], segments[1], segments[2]
+        impl = None
+        for tok in impl_tokens:
+            if impl_status.startswith(tok):
+                impl = tok
+                break
+        if impl is None:
+            continue
+
+        if task_dir not in task_hints:
+            # ignore tasks not present on disk
+            continue
+
+        real_time = bench.get("real_time")
+        unit = bench.get("time_unit", "ns")
+        if real_time is None:
+            continue
+        try:
+            time_sec = float(real_time) * _time_unit_factor(str(unit))
+        except Exception:
+            continue
+
+        entry = perf.setdefault(task_dir, {})
+        entry[impl] = min(time_sec, entry.get(impl, time_sec))
+        types.setdefault(task_dir, tasks_type)
+
+    return perf, types
 
 
 def load_performance_data_threads(perf_stat_file_path: Path) -> dict:
@@ -774,20 +813,17 @@ def main():
         ds = _evenly_spaced_dates(n_items, s, e)
         return ds
 
-    # Locate perf CSVs from CI or local runs (threads and processes)
-    candidates_threads = [
-        script_dir.parent
-        / "build"
-        / "perf_stat_dir"
-        / "threads_task_run_perf_table.csv",
-        script_dir.parent / "perf_stat_dir" / "threads_task_run_perf_table.csv",
-        # Fallback to old single-file name
-        script_dir.parent / "build" / "perf_stat_dir" / "task_run_perf_table.csv",
-        script_dir.parent / "perf_stat_dir" / "task_run_perf_table.csv",
+    # Locate perf results from CI or local runs (prefer Google Benchmark JSON, fallback to legacy CSVs)
+    perf_threads_json_candidates = [
+        script_dir.parent / "build" / "bin" / "perf_results_threads.json",
+        script_dir.parent / "install" / "bin" / "perf_results_threads.json",
+        script_dir.parent / "perf_results_threads.json",
     ]
-    threads_csv = next(
-        (p for p in candidates_threads if p.exists()), candidates_threads[0]
-    )
+    perf_processes_json_candidates = [
+        script_dir.parent / "build" / "bin" / "perf_results_processes.json",
+        script_dir.parent / "install" / "bin" / "perf_results_processes.json",
+        script_dir.parent / "perf_results_processes.json",
+    ]
 
     candidates_processes = [
         script_dir.parent
@@ -800,9 +836,37 @@ def main():
         (p for p in candidates_processes if p.exists()), candidates_processes[0]
     )
 
-    # Read and merge performance statistics CSVs (keys = CSV Task column)
-    perf_stats_threads = load_performance_data_threads(threads_csv)
-    perf_stats_processes = load_performance_data_processes(processes_csv)
+    # Read and merge performance statistics
+    perf_stats_threads = {}
+    perf_stats_processes = {}
+    benchmark_types: dict[str, str] = {}
+    threads_json = next((p for p in perf_threads_json_candidates if p.exists()), None)
+    processes_json = next(
+        (p for p in perf_processes_json_candidates if p.exists()), None
+    )
+
+    task_hints = list(directories.keys())
+    if threads_json:
+        benchmark_perf, bench_types = load_benchmark_json(threads_json, task_hints)
+        benchmark_types.update(bench_types)
+        for task, vals in benchmark_perf.items():
+            thread_impls = {
+                k: v
+                for k, v in vals.items()
+                if k in ["seq", "omp", "stl", "tbb", "all"]
+            }
+            if thread_impls:
+                perf_stats_threads[task] = thread_impls
+    if processes_json:
+        benchmark_perf, bench_types = load_benchmark_json(processes_json, task_hints)
+        benchmark_types.update(bench_types)
+        for task, vals in benchmark_perf.items():
+            proc_impls = {k: v for k, v in vals.items() if k in ["seq", "mpi"]}
+            if proc_impls:
+                perf_stats_processes[task] = proc_impls
+    tasks_type_map.update(benchmark_types)
+    # Fallback to legacy CSVs if JSON is missing
+    # Legacy CSV support removed: require JSON presence; otherwise leave maps empty.
 
     def _aggregate_process_csv(
         perf_stat_file_path: Path, base: dict[str, dict]
@@ -877,7 +941,7 @@ def main():
     for k, v in perf_stats_processes.items():
         perf_stats_raw[k] = {**perf_stats_raw.get(k, {}), **v}
 
-    # Partition tasks by tasks_type from settings.json
+    # Partition tasks by tasks_type reported in benchmark metadata
     threads_task_dirs = [
         name for name, ttype in tasks_type_map.items() if ttype == "threads"
     ]
@@ -885,7 +949,7 @@ def main():
         name for name, ttype in tasks_type_map.items() if ttype == "processes"
     ]
 
-    # Fallback: if settings.json is missing, guess by directory name heuristic
+    # Fallback: if metadata is missing, guess by directory name heuristic
     for name in directories.keys():
         if name not in tasks_type_map or tasks_type_map[name] is None:
             if "threads" in name:

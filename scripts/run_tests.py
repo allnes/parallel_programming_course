@@ -98,10 +98,6 @@ class PPCRunner:
             )
 
         project_path = Path(self.__get_project_path())
-        install_bin_dir = project_path / "install" / "bin"
-        if install_bin_dir.exists():
-            self.work_dir = install_bin_dir
-            return
 
         build_dir = Path(self.build_dir)
         if not build_dir.is_absolute():
@@ -114,11 +110,12 @@ class PPCRunner:
             )
         self.work_dir = bin_dir
 
-    def __run_exec(self, command):
+    def __run_exec(self, command, allowed_codes=None):
         if self.verbose:
             print("Executing:", " ".join(shlex.quote(part) for part in command))
         result = subprocess.run(command, shell=False, env=self.__ppc_env)
-        if result.returncode != 0:
+        allowed = {0} if allowed_codes is None else set(allowed_codes)
+        if result.returncode not in allowed:
             raise Exception(f"Subprocess return {result.returncode}.")
 
     def __detect_mpi_impl(self):
@@ -154,6 +151,7 @@ class PPCRunner:
         return "unknown", "-np"
 
     def __build_mpi_cmd(self, ppc_num_proc, additional_mpi_args):
+        ppc_num_proc = str(ppc_num_proc)
         base = [self.mpi_exec] + shlex.split(additional_mpi_args)
 
         if self.platform == "Windows":
@@ -207,6 +205,10 @@ class PPCRunner:
         ]
         return command
 
+    @staticmethod
+    def __get_benchmark_settings(type_task):
+        return [f"--benchmark_filter=.*_{type_task}_.*"]
+
     def run_threads(self):
         if platform.system() == "Linux" and not self.__ppc_env.get("PPC_ASAN_RUN"):
             for task_type in ["seq", "stl"]:
@@ -251,20 +253,41 @@ class PPCRunner:
                 )
 
     def run_performance(self):
-        if not self.__ppc_env.get("PPC_ASAN_RUN"):
-            mpi_running = self.__build_mpi_cmd(self.__ppc_num_proc, "")
-            for task_type in ["all", "mpi", "seq"]:
-                self.__run_exec(
-                    mpi_running
-                    + [str(self.work_dir / "ppc_perf_tests")]
-                    + self.__get_gtest_settings(1, "_" + task_type + "_")
-                )
+        threads_out = self.work_dir / "perf_results_threads.json"
+        processes_out = self.work_dir / "perf_results_processes.json"
 
-        for task_type in ["omp", "seq", "stl", "tbb"]:
-            self.__run_exec(
-                [str(self.work_dir / "ppc_perf_tests")]
-                + self.__get_gtest_settings(1, "_" + task_type + "_")
-            )
+        common_args = ["--benchmark_out_format=json"]
+
+        # Build regex filters from task directories
+        # filter only by tasks_type prefix from benchmark name: threads:... or processes:...
+        threads_pattern = "threads:.*"
+        processes_pattern = "processes:.*"
+
+        # Threads tasks: run under mpirun with a single process to initialize MPI
+        threads_cmd = self.__build_mpi_cmd(1, "")
+        self.__run_exec(
+            threads_cmd
+            + [str(self.work_dir / "ppc_perf_tests")]
+            + [
+                f"--benchmark_out={threads_out}",
+                f"--benchmark_filter={threads_pattern}",
+            ]
+            + common_args,
+            allowed_codes={0, 5, 10, 12},
+        )
+
+        # Processes tasks: use requested process count
+        processes_cmd = self.__build_mpi_cmd(self.__ppc_num_proc, "")
+        self.__run_exec(
+            processes_cmd
+            + [str(self.work_dir / "ppc_perf_tests")]
+            + [
+                f"--benchmark_out={processes_out}",
+                f"--benchmark_filter={processes_pattern}",
+            ]
+            + common_args,
+            allowed_codes={0, 5, 10, 12},
+        )
 
 
 def _execute(args_dict, env):
@@ -301,6 +324,9 @@ if __name__ == "__main__":
             elif args_dict["running_type"] == "processes":
                 env_copy["PPC_NUM_PROC"] = str(count)
                 env_copy.setdefault("PPC_NUM_THREADS", "1")
+            elif args_dict["running_type"] == "performance":
+                env_copy.setdefault("PPC_NUM_THREADS", str(count))
+                env_copy.setdefault("PPC_NUM_PROC", str(count))
 
             print(
                 f"Executing with {args_dict['running_type']} count: {count}", flush=True

@@ -43,6 +43,7 @@ endforeach()
 ######################### External projects #########################
 
 message( STATUS "PPC step: Setup external projects" )
+include(cmake/benchmark.cmake)
 include(cmake/gtest.cmake)
 
 ############################## Modules ##############################
