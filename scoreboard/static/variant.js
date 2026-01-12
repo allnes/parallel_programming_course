@@ -155,15 +155,15 @@
           const tv = await computeThreadsVariant(student, repoSalt, threadsVmax);
           if (!tv) throw new Error('Fill Last, First, Group');
           res.style.color = '#2563eb';
-          res.innerHTML = `Threads: <b>${tv} of ${threadsVmax}</b>`;
+          res.innerHTML = `${window.variantTexts?.threadsVariantLabel || 'Threads'}: <b>${tv} of ${threadsVmax}</b>`;
         } else {
           const pv = await computeProcessesVariants(student, repoSalt, procVmaxes);
           if (!pv) throw new Error('Fill Last, First, Group');
           res.style.color = '#2563eb';
-          res.innerHTML = `Processes: <b>${pv[0]} / ${pv[1]} / ${pv[2]}</b>`;
+          res.innerHTML = `${window.variantTexts?.processesVariantLabel || 'Processes'}: <b>${pv[0]} / ${pv[1]} / ${pv[2]}</b>`;
         }
       } catch (e) {
-        res.textContent = 'Fill Last, First, Group';
+        res.textContent = (window.variantTexts?.fillPrompt) || 'Fill Last, First, Group';
         res.style.color = '#dc2626';
       }
     });

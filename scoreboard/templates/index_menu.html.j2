@@ -2,70 +2,69 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Scoreboard</title>
+  <title>{{ t.title }}</title>
   <style>{{ inline_css }}</style>
 </head>
 <body>
+  <div class="page-shell">
   <header class="page-header">
     <div>
-      <h1>Scoreboard</h1>
-      <p class="meta">Generated (MSK): {{ generated_at }}</p>
+      <h1>{{ t.title }}</h1>
+      <p class="meta">{{ t.generated_label }} {{ generated_at }}</p>
     </div>
   </header>
 
   <section class="nav-section">
-    <h2>Pages</h2>
+    <h2>{{ t.pages_heading }}</h2>
     <ul class="link-list">
-      <li><a href="threads.html">Threads Scoreboard</a></li>
-      <li><a href="processes.html">Processes Scoreboard</a></li>
+      <li><a href="threads.html">{{ t.threads_title }}</a></li>
+      <li><a href="processes.html">{{ t.processes_title }}</a></li>
       {% if has_variants_page %}
-      <li><a href="variants.html">Variants Lookup</a></li>
+      <li><a href="variants.html">{{ t.variants_title }}</a></li>
       {% endif %}
     </ul>
   </section>
 
   <section class="nav-section">
-    <h2>Groups</h2>
+    <h2>{{ t.groups_heading }}</h2>
     <div class="group-columns">
       <div>
-        <h3>Threads</h3>
+        <h3>{{ t.threads_group_heading }}</h3>
         <ul class="link-list">
           {% if threads_groups %}
             {% for g in threads_groups %}
               <li><a href="{{ g.href }}">{{ g.title }}</a></li>
             {% endfor %}
           {% else %}
-            <li class="muted">No group pages</li>
+            <li class="muted">{{ t.no_group_pages }}</li>
           {% endif %}
         </ul>
       </div>
       <div>
-        <h3>Processes</h3>
+        <h3>{{ t.processes_group_heading }}</h3>
         <ul class="link-list">
           {% if processes_groups %}
             {% for g in processes_groups %}
               <li><a href="{{ g.href }}">{{ g.title }}</a></li>
             {% endfor %}
           {% else %}
-            <li class="muted">No group pages</li>
+            <li class="muted">{{ t.no_group_pages }}</li>
           {% endif %}
         </ul>
       </div>
     </div>
   </section>
 
-  <section class="legend">
-    <h2>Legend</h2>
-    <p>
-      <b>(V)ariant</b> - Task variant number assigned to the student.<br/>
-      <b>(R)eport</b> - Task report in Markdown (.md), required.<br/>
-      <b>(S)olution</b> - The correctness and completeness of the implemented solution.<br/>
-      <b>(A)cceleration</b> - The process of speeding up software to improve performance. Speedup = T(seq) / T(parallel)<br/>
-      <b>(E)fficiency</b> - Optimizing software speed-up by improving CPU utilization and resource management. Efficiency = Speedup / NumProcs (fraction, not %)<br/>
-      <b>(P)erformance</b> - Points awarded based on efficiency thresholds (see docs).<br/>
-      <b>(D)eadline</b> - The timeliness of the submission in relation to the given deadline (due at 23:59 MSK on the shown date).<br/>
-      <b>(C)opying</b> - Penalty for detected copying cases.
-    </p>
+  
+      <section class="legend">
+    <h2>{{ t.legend_heading }}</h2>
+    <table class="legend-table">
+      {% for term, desc in t.legend_pairs %}
+      <tr><td class="legend-term">{{ term }}</td><td class="legend-def">{{ desc }}</td></tr>
+      {% endfor %}
+    </table>
   </section>
+
+  </div>
 </body>
 </html>

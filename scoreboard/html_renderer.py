@@ -24,6 +24,7 @@ def render_threads_page(
     deadlines: Dict[str, str],
     generated_at: str,
     inline_css: str,
+    texts: dict,
     repo_salt: str,
     threads_vmax: int,
 ) -> str:
@@ -34,6 +35,7 @@ def render_threads_page(
         deadlines=deadlines,
         generated_at=generated_at,
         inline_css=inline_css,
+        t=texts,
         repo_salt=repo_salt,
         threads_vmax=threads_vmax,
     )
@@ -44,6 +46,7 @@ def render_processes_page(
     deadlines: List[str],
     generated_at: str,
     inline_css: str,
+    texts: dict,
     repo_salt: str,
     proc_vmaxes: list[int],
 ) -> str:
@@ -54,6 +57,7 @@ def render_processes_page(
         deadlines=deadlines,
         generated_at=generated_at,
         inline_css=inline_css,
+        t=texts,
         repo_salt=repo_salt,
         proc_vmaxes=proc_vmaxes,
     )
@@ -65,6 +69,7 @@ def render_index_page(
     has_variants_page: bool,
     generated_at: str,
     inline_css: str,
+    texts: dict,
 ) -> str:
     env = _environment()
     template = env.get_template("index_menu.html.j2")
@@ -74,6 +79,7 @@ def render_index_page(
         has_variants_page=has_variants_page,
         generated_at=generated_at,
         inline_css=inline_css,
+        t=texts,
     )
 
 
@@ -84,6 +90,7 @@ def render_variants_page(
     repo_salt: str,
     threads_vmax: int,
     proc_vmaxes: list[int],
+    texts: dict,
 ) -> str:
     env = _environment()
     template = env.get_template("variants.html.j2")
@@ -94,6 +101,7 @@ def render_variants_page(
         repo_salt=repo_salt,
         threads_vmax=threads_vmax,
         proc_vmaxes=proc_vmaxes,
+        t=texts,
     )
 
 

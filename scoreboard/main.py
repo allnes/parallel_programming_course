@@ -35,6 +35,7 @@ from html_renderer import (
     render_variants_page,
 )
 from metrics import compute_variant_threads, compute_variants_processes
+from texts import TEXT
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
@@ -224,6 +225,7 @@ def main() -> None:
         threads_deadlines_labels,
         generated_at,
         css,
+        texts=TEXT,
         repo_salt=REPO_SALT,
         threads_vmax=threads_vmax,
     )
@@ -232,6 +234,7 @@ def main() -> None:
         processes_deadlines_labels,
         generated_at,
         css,
+        texts=TEXT,
         repo_salt=REPO_SALT,
         proc_vmaxes=proc_vmaxes,
     )
@@ -261,6 +264,7 @@ def main() -> None:
             threads_deadlines_labels,
             generated_at,
             css,
+            texts=TEXT,
             repo_salt=REPO_SALT,
             threads_vmax=threads_vmax,
         )
@@ -289,6 +293,7 @@ def main() -> None:
             processes_deadlines_labels,
             generated_at,
             css,
+            texts=TEXT,
             repo_salt=REPO_SALT,
             proc_vmaxes=proc_vmaxes,
         )
@@ -326,6 +331,7 @@ def main() -> None:
         repo_salt=REPO_SALT,
         threads_vmax=threads_vmax,
         proc_vmaxes=proc_vmaxes,
+        texts=TEXT,
     )
     (output_dir / "variants.html").write_text(variants_html, encoding="utf-8")
 
@@ -343,6 +349,7 @@ def main() -> None:
         has_variants_page=True,
         generated_at=generated_at,
         inline_css=css,
+        texts=TEXT,
     )
     (output_dir / "index.html").write_text(index_html, encoding="utf-8")
 

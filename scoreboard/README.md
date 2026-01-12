@@ -1,7 +1,7 @@
 # Scoreboard
 
-Static HTML generator for the course scoreboard. All calculations happen in Python; the output pages are
-offline-ready and contain no JavaScript.
+Static HTML generator for the course scoreboard. All calculations happen in Python; a small bundled JS
+snippet is used only for client-side variant calculation.
 
 ## Usage
 
@@ -29,4 +29,4 @@ pytest -v
 
 - Threads deadlines are auto-distributed across 1 Feb → 15 May; processes across 15 Oct → 14 Dec, with
   per-task shifts from `deadlines.yml`.
-- CSS is bundled locally (no CDN, no JS); HTML pages remain self-contained for offline use.
+- CSS is bundled locally (no CDN); HTML pages remain self-contained, with JS limited to the variant calculator.

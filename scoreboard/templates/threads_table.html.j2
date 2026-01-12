@@ -2,28 +2,20 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Threads Scoreboard</title>
-  <style>{{ inline_css }}</style>
+  <title>{{ t.threads_title }}</title>
+<style>{{ inline_css }}</style>
+<script>window.variantTexts = {{ t.variant_texts | tojson | safe }};</script>
 <script src="static/variant.js"></script>
 </head>
 <body>
-  <header class="page-header">
-    <div>
-      <h1>Threads Scoreboard</h1>
-      <p class="meta">Generated (MSK): {{ generated_at }}</p>
-      <p class="meta"><a href="index.html">← Back to Index</a></p>
-      <p class="muted" style="margin:4px 0 0 0;">Threads have 1 variant; Processes have 3 variants (tasks 1/2/3).</p>
-    </div>
+  <div class="page-shell page-shell--full">
+  <header class="page-header column">
+    <h1>{{ t.threads_title }}</h1>
+    <p class="meta">{{ t.generated_label }} {{ generated_at }}</p>
     <div class="legend">
-      <span><b>V</b> — variant</span>
-      <span><b>R</b> — report</span>
-      <span><b>S</b> — solution</span>
-      <span><b>P</b> — performance points</span>
-      <span><b>A</b> — acceleration</span>
-      <span><b>E</b> — efficiency</span>
-      <span><b>D</b> — deadline delta</span>
-      <span><b>C</b> — copying penalty</span>
+      {% for item in t.legend_table %}<span>{{ item }}</span>{% endfor %}
     </div>
+    <p class="meta"><a class="action-link" href="index.html">{{ t.back_to_index }}</a></p>
   </header>
 
   <table class="score-table">
@@ -80,5 +72,6 @@
   <script>
     variantCalc.fillThreadsTable({{ repo_salt | tojson | safe }}, {{ threads_vmax | int }});
   </script>
+  </div>
 </body>
 </html>
