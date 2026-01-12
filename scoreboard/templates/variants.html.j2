@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Variants Lookup</title>
+  <style>{{ inline_css }}</style>
+  <script src="static/variant.js"></script>
+</head>
+<body>
+  <header class="page-header">
+    <div>
+      <h1>Variants Lookup</h1>
+      <p class="meta">Generated (MSK): {{ generated_at }}</p>
+      <p class="meta"><a href="index.html">← Back to Index</a></p>
+    </div>
+    <div class="legend">
+      <span><b>Threads</b> — variant for threads tasks</span>
+      <span><b>Processes</b> — variants for task-1/2/3 (line breaks)</span>
+    </div>
+  </header>
+
+  <section class="nav-section">
+    <h2>Compute my variant</h2>
+    <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end;">
+      <label><input type="radio" name="sem" value="threads" checked> Threads</label>
+      <label><input type="radio" name="sem" value="processes"> Processes</label>
+      <label>Last<br><input id="v_last" type="text" style="width:160px"></label>
+      <label>First<br><input id="v_first" type="text" style="width:160px"></label>
+      <label>Middle<br><input id="v_middle" type="text" style="width:160px"></label>
+      <label>Group<br><input id="v_group" type="text" style="width:160px"></label>
+      <button id="v_calc" style="height:40px;">Compute</button>
+      <div id="v_result" style="min-width:200px; font-weight:700; color:#2563eb;"></div>
+    </div>
+    <p class="muted" style="margin-top:6px;">Threads have 1 variant; Processes have 3 variants (tasks 1/2/3).</p>
+  </section>
+
+  <script>
+    variantCalc.attachForm(
+      {{ repo_salt | tojson | safe }},
+      {{ threads_vmax | int }},
+      {{ proc_vmaxes | tojson | safe }}
+    );
+    variantCalc.fillThreadsTable({{ repo_salt | tojson | safe }}, {{ threads_vmax | int }});
+    variantCalc.fillProcessesTable({{ repo_salt | tojson | safe }}, {{ proc_vmaxes | tojson | safe }});
+  </script>
+</body>
+</html>

@@ -97,106 +97,104 @@ msgid "Performance points mapping"
 msgstr "Маппинг баллов за производительность"
 
 #: ../../../../docs/common_information/points.rst:44
+#: ../../../../docs/common_information/points.rst:42
 msgid ""
-"The ratio of efficiency percentage to points percentage (max 100%, min "
-"0%):"
-msgstr "Соотношение процента эффективности к проценту баллов (макс. 100%, мин. 0%):"
-
-#: ../../../../docs/common_information/points.rst:46
-msgid "If the score is not an integer, it is rounded up."
-msgstr "Если значение не целое, округляется в большую сторону."
+"Efficiency is a fraction (Speedup / NumProcs). The table maps efficiency to "
+"the fraction of performance points (max 100%, min 0%). If the score is not "
+"an integer, it is rounded up."
+msgstr "Эффективность — это доля (ускорение / число процессов). Таблица сопоставляет эффективность доле баллов за performance (макс. 100%, мин. 0%). Если значение не целое, оно округляется вверх."
 
 #: ../../../../docs/common_information/points.rst:49
-msgid "Efficiency (%)"
-msgstr "Эффективность"
+msgid "Efficiency"
+msgstr "Эффективность (доля)"
 
 #: ../../../../docs/common_information/points.rst:49
 msgid "Points percentage"
 msgstr "Процент баллов за производительность"
 
 #: ../../../../docs/common_information/points.rst:51
-msgid ">= 50%"
-msgstr ">= 50%"
+msgid ">= 0.50"
+msgstr ">= 0.50"
 
 #: ../../../../docs/common_information/points.rst:51
 msgid "100%"
 msgstr "100%"
 
 #: ../../../../docs/common_information/points.rst:53
-msgid "[45, 50)"
-msgstr "[45, 50)"
+msgid "[0.45, 0.50)"
+msgstr "[0.45, 0.50)"
 
 #: ../../../../docs/common_information/points.rst:53
 msgid "90%"
 msgstr "90%"
 
 #: ../../../../docs/common_information/points.rst:55
-msgid "[42, 45)"
-msgstr "[42, 45)"
+msgid "[0.42, 0.45)"
+msgstr "[0.42, 0.45)"
 
 #: ../../../../docs/common_information/points.rst:55
 msgid "80%"
 msgstr "80%"
 
 #: ../../../../docs/common_information/points.rst:57
-msgid "[40, 42)"
-msgstr "[40, 42)"
+msgid "[0.40, 0.42)"
+msgstr "[0.40, 0.42)"
 
 #: ../../../../docs/common_information/points.rst:57
 msgid "70%"
 msgstr "70%"
 
 #: ../../../../docs/common_information/points.rst:59
-msgid "[37, 40)"
-msgstr "[37, 40)"
+msgid "[0.37, 0.40)"
+msgstr "[0.37, 0.40)"
 
 #: ../../../../docs/common_information/points.rst:59
 msgid "60%"
 msgstr "60%"
 
 #: ../../../../docs/common_information/points.rst:61
-msgid "[35, 37)"
-msgstr "[35, 37)"
+msgid "[0.35, 0.37)"
+msgstr "[0.35, 0.37)"
 
 #: ../../../../docs/common_information/points.rst:61
 msgid "50%"
 msgstr "50%"
 
 #: ../../../../docs/common_information/points.rst:63
-msgid "[32, 35)"
-msgstr "[32, 35)"
+msgid "[0.32, 0.35)"
+msgstr "[0.32, 0.35)"
 
 #: ../../../../docs/common_information/points.rst:63
 msgid "40%"
 msgstr "40%"
 
 #: ../../../../docs/common_information/points.rst:65
-msgid "[30, 32)"
-msgstr "[30, 32)"
+msgid "[0.30, 0.32)"
+msgstr "[0.30, 0.32)"
 
 #: ../../../../docs/common_information/points.rst:65
 msgid "30%"
 msgstr "30%"
 
 #: ../../../../docs/common_information/points.rst:67
-msgid "[27, 30)"
-msgstr "[27, 30)"
+msgid "[0.27, 0.30)"
+msgstr "[0.27, 0.30)"
 
 #: ../../../../docs/common_information/points.rst:67
 msgid "20%"
 msgstr "20%"
 
 #: ../../../../docs/common_information/points.rst:69
-msgid "[25, 27)"
-msgstr "[25, 27)"
+msgid "[0.25, 0.27)"
+msgstr "[0.25, 0.27)"
 
 #: ../../../../docs/common_information/points.rst:69
 msgid "10%"
 msgstr "10%"
 
 #: ../../../../docs/common_information/points.rst:71
-msgid "< 25%"
-msgstr "< 25%"
+msgid "< 0.25"
+msgstr "< 0.25"
 
 #: ../../../../docs/common_information/points.rst:71
 msgid "0%"

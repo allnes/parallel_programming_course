@@ -1,57 +1,32 @@
 # Scoreboard
 
-HTML scoreboard generator for parallel programming tasks.
+Static HTML generator for the course scoreboard. All calculations happen in Python; the output pages are
+offline-ready and contain no JavaScript.
 
 ## Usage
 
 ```bash
-# Install dependencies
 pip install -r requirements.txt
-
-# Generate scoreboard
-python main.py -o output_directory
+python main.py -o build/html
 ```
 
-Generates `output_directory/index.html` with the scoreboard.
+Generated files: `index.html`, `threads.html`, `processes.html` and optional per-group pages.
 
 ## Configuration
 
-- `data/points-info.yml` - Task points, deadlines, penalties
-- `data/plagiarism.yml` - Flagged submissions
-- `data/deadlines.yml` - Optional display deadlines and day offsets
+- `data/points-info.yml` — max points, variants, performance scale
+- `data/deadlines.yml` — deadline offsets/labels for display and penalty
+- `data/copying.yml` — flagged submissions per task (with coefficient in `points-info.yml`)
 
 ## Testing
 
 ```bash
-# Install test dependencies
 pip install -r tests/requirements.txt
-
-# Run tests
-python -m pytest tests/ -v
+pytest -v
 ```
 
-## Output
+## Notes
 
-HTML table with columns: S (solution), A (acceleration), E (efficiency), D (deadline), C (copying), Total.
-
-### Deadlines display
-
-- Threads deadlines are auto-distributed across the Spring window: 1 Feb → 15 May.
-- Processes deadlines are auto-distributed across the Autumn window: 15 Oct → 14 Dec.
-- Due time is 23:59 MSK on the shown date.
-- File `data/deadlines.yml` can shift dates per item by integer day offsets (default 0). Example:
-
-```yaml
-threads:
-  seq: 0     # no shift
-  omp: -2    # 2 days earlier
-  tbb: 3     # 3 days later
-  stl: 0
-  all: 0
-processes:
-  task_1: 0
-  task_2: 5
-  task_3: -1
-```
-
-- If you put a non-integer string instead of a number, it is used as-is as the label (e.g., `"10 Nov"`).
+- Threads deadlines are auto-distributed across 1 Feb → 15 May; processes across 15 Oct → 14 Dec, with
+  per-task shifts from `deadlines.yml`.
+- CSS is bundled locally (no CDN, no JS); HTML pages remain self-contained for offline use.

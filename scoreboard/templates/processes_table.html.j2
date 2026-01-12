@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Processes Scoreboard</title>
+  <style>{{ inline_css }}</style>
+<script src="static/variant.js"></script>
+</head>
+<body>
+  <header class="page-header">
+    <div>
+      <h1>Processes Scoreboard</h1>
+      <p class="meta">Generated (MSK): {{ generated_at }}</p>
+      <p class="meta"><a href="index.html">← Back to Index</a></p>
+      <p class="muted" style="margin:4px 0 0 0;">Threads have 1 variant; Processes have 3 variants (tasks 1/2/3).</p>
+    </div>
+    <div class="legend">
+      <span><b>V</b> — variants for task-1/2/3</span>
+      <span><b>R</b> — report</span>
+      <span><b>S</b> — solution</span>
+      <span><b>P</b> — performance points</span>
+      <span><b>A</b> — acceleration</span>
+      <span><b>E</b> — efficiency</span>
+      <span><b>D</b> — deadline delta</span>
+      <span><b>C</b> — copying penalty</span>
+    </div>
+  </header>
+
+  <table class="score-table">
+    <thead>
+      <tr>
+        <th rowspan="3">Name</th>
+        <th rowspan="3" class="narrow">V</th>
+        {% for _ in [1,2,3] %}
+          <th colspan="10" class="task-header">
+            <div class="task-title">
+              <span class="task-name">task-{{ loop.index }}</span>
+              {% if deadlines[loop.index0] %}<span class="deadline">{{ deadlines[loop.index0] }}</span>{% endif %}
+            </div>
+          </th>
+        {% endfor %}
+        <th rowspan="3" class="narrow">Total</th>
+      </tr>
+      <tr>
+        {% for _ in [1,2,3] %}
+          <th colspan="3" class="subhead">seq</th>
+          <th colspan="6" class="subhead">mpi</th>
+          <th rowspan="2" class="narrow">R</th>
+        {% endfor %}
+      </tr>
+      <tr>
+        {% for _ in [1,2,3] %}
+          {% for letter in ['S','D','C'] %}<th class="narrow">{{ letter }}</th>{% endfor %}
+          {% for letter in ['S','P','A','E','D','C'] %}<th class="narrow">{{ letter }}</th>{% endfor %}
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in rows %}
+        <tr data-last="{{ row.student.last_name|default('') }}" data-first="{{ row.student.first_name|default('') }}" data-middle="{{ row.student.middle_name|default('') }}" data-group="{{ row.student.group_number|default('') }}">
+          <td class="name">{{ row.name|safe }}</td>
+          <td class="narrow variant-cell">—</td>
+          {% set idx = namespace(value=0) %}
+          {% set ri = namespace(value=0) %}
+          {% for _ in [1,2,3] %}
+            {% set seq_cell = row.groups[idx.value] %}
+            {% set mpi_cell = row.groups[idx.value + 1] %}
+            <td class="narrow {{ seq_cell.solution_class }}">{{ seq_cell.solution_points }}</td>
+            <td class="narrow deadline-cell">{{ seq_cell.deadline_penalty }}</td>
+            <td class="narrow {{ seq_cell.copy_class }}">{{ seq_cell.copy_penalty }}</td>
+
+            <td class="narrow {{ mpi_cell.solution_class }}">{{ mpi_cell.solution_points }}</td>
+            <td class="narrow perf-cell">{{ mpi_cell.performance_points }}</td>
+            <td class="narrow perf-cell">{{ mpi_cell.acceleration }}</td>
+            <td class="narrow perf-cell">{{ mpi_cell.efficiency }}</td>
+            <td class="narrow deadline-cell">{{ mpi_cell.deadline_penalty }}</td>
+            <td class="narrow {{ mpi_cell.copy_class }}">{{ mpi_cell.copy_penalty }}</td>
+
+            <td class="narrow {{ 'cell-success' if row.r_values[ri.value] else '' }}">{{ row.r_values[ri.value] }}</td>
+            {% set idx.value = idx.value + 2 %}
+            {% set ri.value = ri.value + 1 %}
+          {% endfor %}
+         <td class="narrow total">{{ '%.2f'|format(row.total) }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <script>
+    variantCalc.fillProcessesTable({{ repo_salt | tojson | safe }}, {{ proc_vmaxes | tojson | safe }});
+  </script>
+</body>
+</html>

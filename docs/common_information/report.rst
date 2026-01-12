@@ -91,14 +91,14 @@ Use the following skeleton as a starting point for your ``report.md``. Keep file
    ### 7.1 Correctness
    Briefly explain how correctness was verified (reference results, invariants, unit tests).
    
-   ### 7.2 Performance
-   Present time, speedup and efficiency. Example table:
-   
-   | Mode        | Count | Time, s | Speedup | Efficiency |
-   |-------------|-------|---------|---------|------------|
-   | seq         | 1     | 1.234   | 1.00    | N/A        |
-   | omp         | 2     | 0.700   | 1.76    | 88.0%      |
-   | omp         | 4     | 0.390   | 3.16    | 79.0%      |
+### 7.2 Performance
+Present time, speedup and efficiency (efficiency is a fraction: Speedup / NumProcs). Example table:
+
+| Mode        | Count | Time, s | Speedup | Efficiency |
+|-------------|-------|---------|---------|------------|
+| seq         | 1     | 1.234   | 1.00    | N/A        |
+| omp         | 2     | 0.700   | 1.76    | 0.88       |
+| omp         | 4     | 0.390   | 3.16    | 0.79       |
    
    Optionally add plots (use relative paths), and discuss bottlenecks and scalability limits.
    

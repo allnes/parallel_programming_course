@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Threads Scoreboard</title>
+  <style>{{ inline_css }}</style>
+<script src="static/variant.js"></script>
+</head>
+<body>
+  <header class="page-header">
+    <div>
+      <h1>Threads Scoreboard</h1>
+      <p class="meta">Generated (MSK): {{ generated_at }}</p>
+      <p class="meta"><a href="index.html">← Back to Index</a></p>
+      <p class="muted" style="margin:4px 0 0 0;">Threads have 1 variant; Processes have 3 variants (tasks 1/2/3).</p>
+    </div>
+    <div class="legend">
+      <span><b>V</b> — variant</span>
+      <span><b>R</b> — report</span>
+      <span><b>S</b> — solution</span>
+      <span><b>P</b> — performance points</span>
+      <span><b>A</b> — acceleration</span>
+      <span><b>E</b> — efficiency</span>
+      <span><b>D</b> — deadline delta</span>
+      <span><b>C</b> — copying penalty</span>
+    </div>
+  </header>
+
+  <table class="score-table">
+    <thead>
+      <tr>
+        <th rowspan="2">Name</th>
+        <th rowspan="2" class="narrow">V</th>
+        {% for task in ['seq','omp','tbb','stl','all'] %}
+          <th colspan="{{ 4 if task == 'seq' else 7 }}" class="task-header">
+            <div class="task-title">
+              <span class="task-name">{{ task }}</span>
+              {% if deadlines.get(task) %}<span class="deadline">{{ deadlines.get(task) }}</span>{% endif %}
+            </div>
+          </th>
+        {% endfor %}
+        <th rowspan="2" class="narrow">Total</th>
+      </tr>
+      <tr>
+        {% for task in ['seq','omp','tbb','stl','all'] %}
+          {% set letters = ['S','D','C','R'] if task == 'seq' else ['S','P','A','E','D','C','R'] %}
+          {% for letter in letters %}
+            <th class="narrow">{{ letter }}</th>
+          {% endfor %}
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in rows %}
+        <tr data-last="{{ row.student.last_name|default('') }}" data-first="{{ row.student.first_name|default('') }}" data-middle="{{ row.student.middle_name|default('') }}" data-group="{{ row.student.group_number|default('') }}">
+          <td class="name">{{ row.name|safe }}</td>
+          <td class="narrow variant-cell">—</td>
+          {% for task in ['seq','omp','tbb','stl','all'] %}
+            {% set cell = row.cells[task] %}
+            {% if task == 'seq' %}
+              <td class="narrow {{ cell.solution_class }}">{{ cell.solution_points }}</td>
+              <td class="narrow deadline-cell">{{ cell.deadline_penalty }}</td>
+              <td class="narrow {{ cell.copy_class }}">{{ cell.copy_penalty }}</td>
+              <td class="narrow {{ cell.report_class }}">{{ cell.report_points }}</td>
+            {% else %}
+              <td class="narrow {{ cell.solution_class }}">{{ cell.solution_points }}</td>
+              <td class="narrow perf-cell">{{ cell.performance_points }}</td>
+              <td class="narrow perf-cell">{{ cell.acceleration }}</td>
+              <td class="narrow perf-cell">{{ cell.efficiency }}</td>
+              <td class="narrow deadline-cell">{{ cell.deadline_penalty }}</td>
+              <td class="narrow {{ cell.copy_class }}">{{ cell.copy_penalty }}</td>
+              <td class="narrow {{ cell.report_class }}">{{ cell.report_points }}</td>
+            {% endif %}
+          {% endfor %}
+          <td class="narrow total">{{ '%.2f'|format(row.total) }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <script>
+    variantCalc.fillThreadsTable({{ repo_salt | tojson | safe }}, {{ threads_vmax | int }});
+  </script>
+</body>
+</html>
