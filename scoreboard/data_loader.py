@@ -1,6 +1,6 @@
 """Data loading helpers for the scoreboard generator.
 
-This module is responsible for reading YAML configs, discovering task
+This module is responsible for reading JSON configs, discovering task
 folders on disk, and loading auxiliary data such as benchmark results
 and student metadata.
 """
@@ -13,8 +13,6 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Iterable
 
-import yaml
-
 logger = logging.getLogger(__name__)
 
 # Paths
@@ -24,31 +22,31 @@ DATA_DIR = SCRIPT_DIR / "data"
 
 
 # ---------------------------------------------------------------------------
-# YAML helpers
+# JSON helpers
 # ---------------------------------------------------------------------------
 
 
-def _load_yaml(path: Path) -> dict:
+def _load_json(path: Path) -> dict:
     if not path.exists():
         raise FileNotFoundError(path)
     with open(path, "r", encoding="utf-8") as f:
-        data = yaml.safe_load(f)
+        data = json.load(f)
     return data or {}
 
 
 def load_points_info() -> dict:
-    return _load_yaml(DATA_DIR / "points-info.yml")
+    return _load_json(DATA_DIR / "points-info.json")
 
 
 def load_copying_config() -> dict:
-    return _load_yaml(DATA_DIR / "copying.yml")
+    return _load_json(DATA_DIR / "copying.json")
 
 
 def load_deadline_shifts() -> dict:
-    path = DATA_DIR / "deadlines.yml"
+    path = DATA_DIR / "deadlines.json"
     if not path.exists():
         return {"threads": {}, "processes": {}}
-    return _load_yaml(path)
+    return _load_json(path)
 
 
 # ---------------------------------------------------------------------------

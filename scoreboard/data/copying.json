@@ -1,0 +1,23 @@
+{
+  "processes": {
+    "copying": {
+      "mpi": [
+        "example_processes"
+      ],
+      "seq": [
+        "example_processes"
+      ]
+    }
+  },
+  "threads": {
+    "copying": {
+      "all": [],
+      "omp": [],
+      "seq": [
+        "example_threads"
+      ],
+      "stl": [],
+      "tbb": []
+    }
+  }
+}

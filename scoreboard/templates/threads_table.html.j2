@@ -23,8 +23,9 @@
       <tr>
         <th rowspan="2">Name</th>
         <th rowspan="2" class="narrow">V</th>
-        {% for task in ['seq','omp','tbb','stl','all'] %}
-          <th colspan="{{ 4 if task == 'seq' else 7 }}" class="task-header">
+        {% for task in thread_tasks %}
+          {% set letters = ['S','D','C','R'] if task == 'seq' else ['S','P','A','E','D','C','R'] %}
+          <th colspan="{{ letters | length }}" class="task-header">
             <div class="task-title">
               <span class="task-name">{{ task }}</span>
               {% if deadlines.get(task) %}<span class="deadline">{{ deadlines.get(task) }}</span>{% endif %}
@@ -34,7 +35,7 @@
         <th rowspan="2" class="narrow">Total</th>
       </tr>
       <tr>
-        {% for task in ['seq','omp','tbb','stl','all'] %}
+        {% for task in thread_tasks %}
           {% set letters = ['S','D','C','R'] if task == 'seq' else ['S','P','A','E','D','C','R'] %}
           {% for letter in letters %}
             <th class="narrow">{{ letter }}</th>
@@ -47,7 +48,7 @@
         <tr data-last="{{ row.student.last_name|default('') }}" data-first="{{ row.student.first_name|default('') }}" data-middle="{{ row.student.middle_name|default('') }}" data-group="{{ row.student.group_number|default('') }}">
           <td class="name">{{ row.name|safe }}</td>
           <td class="narrow variant-cell">—</td>
-          {% for task in ['seq','omp','tbb','stl','all'] %}
+          {% for task in thread_tasks %}
             {% set cell = row.cells[task] %}
             {% if task == 'seq' %}
               <td class="narrow {{ cell.solution_class }}">{{ cell.solution_points }}</td>
@@ -56,7 +57,7 @@
               <td class="narrow {{ cell.report_class }}">{{ cell.report_points }}</td>
             {% else %}
               <td class="narrow {{ cell.solution_class }}">{{ cell.solution_points }}</td>
-              <td class="narrow perf-cell">{{ cell.performance_points }}</td>
+              <td class="narrow perf-cell">{{ cell.performance_display }}</td>
               <td class="narrow perf-cell">{{ cell.acceleration }}</td>
               <td class="narrow perf-cell">{{ cell.efficiency }}</td>
               <td class="narrow deadline-cell">{{ cell.deadline_penalty }}</td>

@@ -1,0 +1,153 @@
+{
+  "copying": {
+    "coefficient": 0.5,
+    "note": "Penalty C = -coefficient * S (scoreboard notation)"
+  },
+  "efficiency": {
+    "num_proc": 4
+  },
+  "efficiency_scale": [
+    {
+      "percent": 1.0,
+      "threshold": 0.5
+    },
+    {
+      "percent": 0.9,
+      "threshold": 0.45
+    },
+    {
+      "percent": 0.8,
+      "threshold": 0.42
+    },
+    {
+      "percent": 0.7,
+      "threshold": 0.4
+    },
+    {
+      "percent": 0.6,
+      "threshold": 0.37
+    },
+    {
+      "percent": 0.5,
+      "threshold": 0.35
+    },
+    {
+      "percent": 0.4,
+      "threshold": 0.32
+    },
+    {
+      "percent": 0.3,
+      "threshold": 0.3
+    },
+    {
+      "percent": 0.2,
+      "threshold": 0.27
+    },
+    {
+      "percent": 0.1,
+      "threshold": 0.25
+    }
+  ],
+  "processes": {
+    "semester_total": 70,
+    "tasks": [
+      {
+        "R": 2,
+        "Total": 12,
+        "mpi": [
+          {
+            "S": 8
+          },
+          {
+            "A": 0
+          }
+        ],
+        "name": "mpi_task_1",
+        "seq": [
+          {
+            "S": 2
+          }
+        ],
+        "variants_max": 27
+      },
+      {
+        "R": 3,
+        "Total": 23,
+        "mpi": [
+          {
+            "S": 12
+          },
+          {
+            "A": 5
+          }
+        ],
+        "name": "mpi_task_2",
+        "seq": [
+          {
+            "S": 3
+          }
+        ],
+        "variants_max": 23
+      },
+      {
+        "R": 5,
+        "Total": 35,
+        "mpi": [
+          {
+            "S": 16
+          },
+          {
+            "A": 10
+          }
+        ],
+        "name": "mpi_task_3",
+        "seq": [
+          {
+            "S": 4
+          }
+        ],
+        "variants_max": 32
+      }
+    ]
+  },
+  "threads": {
+    "semester_total": 64,
+    "tasks": [
+      {
+        "R": 1,
+        "S": 4,
+        "Total": 5,
+        "name": "seq"
+      },
+      {
+        "A": 3,
+        "R": 2,
+        "S": 6,
+        "Total": 11,
+        "name": "omp"
+      },
+      {
+        "A": 3,
+        "R": 2,
+        "S": 6,
+        "Total": 11,
+        "name": "tbb"
+      },
+      {
+        "A": 6,
+        "R": 2,
+        "S": 8,
+        "Total": 16,
+        "name": "stl"
+      },
+      {
+        "A": 8,
+        "R": 3,
+        "S": 10,
+        "Total": 21,
+        "name": "all"
+      }
+    ],
+    "variants_max": 30
+  }
+}

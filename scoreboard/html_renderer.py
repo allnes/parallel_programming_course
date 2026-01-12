@@ -27,6 +27,7 @@ def render_threads_page(
     texts: dict,
     repo_salt: str,
     threads_vmax: int,
+    thread_tasks: List[str],
 ) -> str:
     env = _environment()
     template = env.get_template("threads_table.html.j2")
@@ -38,6 +39,7 @@ def render_threads_page(
         t=texts,
         repo_salt=repo_salt,
         threads_vmax=threads_vmax,
+        thread_tasks=thread_tasks,
     )
 
 
@@ -49,6 +51,7 @@ def render_processes_page(
     texts: dict,
     repo_salt: str,
     proc_vmaxes: list[int],
+    proc_tasks: List[Any],
 ) -> str:
     env = _environment()
     template = env.get_template("processes_table.html.j2")
@@ -60,6 +63,7 @@ def render_processes_page(
         t=texts,
         repo_salt=repo_salt,
         proc_vmaxes=proc_vmaxes,
+        proc_tasks=proc_tasks,
     )
 
 
