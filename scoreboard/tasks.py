@@ -164,6 +164,7 @@ class ThreadTask(Task):
     def __init__(
         self,
         name: str,
+        display_name: str | None,
         s_points: int,
         a_points: int,
         r_points: int,
@@ -183,6 +184,7 @@ class ThreadTask(Task):
         self.s_points = s_points
         self.a_points = a_points
         self.r_points = r_points
+        self.display_name = display_name or name
 
     def calculate_score(
         self, student, submission: ThreadSubmission | None
@@ -276,6 +278,7 @@ class ProcessTask(Task):
     def __init__(
         self,
         name: str,
+        display_name: str | None,
         mpi_points: dict,
         seq_points: dict,
         r_points: int,
@@ -300,6 +303,7 @@ class ProcessTask(Task):
         self.seq_points = {k: int(v) for k, v in seq_points.items()}
         self.r_points = int(r_points)
         self.variants_max = int(variants_max)
+        self.display_name = display_name or name
 
     def calculate_score(
         self, student, submission: ProcessSubmission | None

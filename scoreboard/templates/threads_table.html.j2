@@ -24,11 +24,11 @@
         <th rowspan="2">Name</th>
         <th rowspan="2" class="narrow">V</th>
         {% for task in thread_tasks %}
-          {% set letters = ['S','D','C','R'] if task == 'seq' else ['S','P','A','E','D','C','R'] %}
+          {% set letters = ['S','D','C','R'] if task.name == 'seq' else ['S','P','A','E','D','C','R'] %}
           <th colspan="{{ letters | length }}" class="task-header">
             <div class="task-title">
-              <span class="task-name">{{ task }}</span>
-              {% if deadlines.get(task) %}<span class="deadline">{{ deadlines.get(task) }}</span>{% endif %}
+              <span class="task-name">{{ task.display_name }}</span>
+              {% if deadlines.get(task.name) %}<span class="deadline">{{ deadlines.get(task.name) }}</span>{% endif %}
             </div>
           </th>
         {% endfor %}
@@ -36,7 +36,7 @@
       </tr>
       <tr>
         {% for task in thread_tasks %}
-          {% set letters = ['S','D','C','R'] if task == 'seq' else ['S','P','A','E','D','C','R'] %}
+          {% set letters = ['S','D','C','R'] if task.name == 'seq' else ['S','P','A','E','D','C','R'] %}
           {% for letter in letters %}
             <th class="narrow">{{ letter }}</th>
           {% endfor %}
@@ -49,8 +49,8 @@
           <td class="name">{{ row.name|safe }}</td>
           <td class="narrow variant-cell">—</td>
           {% for task in thread_tasks %}
-            {% set cell = row.cells[task] %}
-            {% if task == 'seq' %}
+            {% set cell = row.cells[task.name] %}
+            {% if task.name == 'seq' %}
               <td class="narrow {{ cell.solution_class }}">{{ cell.solution_points }}</td>
               <td class="narrow deadline-cell">{{ cell.deadline_penalty }}</td>
               <td class="narrow {{ cell.copy_class }}">{{ cell.copy_penalty }}</td>

@@ -8,6 +8,7 @@ import shutil
 from datetime import datetime
 from pathlib import Path
 
+from builder import load_scoreboard
 from data_loader import SCRIPT_DIR
 from html_renderer import (
     render_index_page,
@@ -17,8 +18,6 @@ from html_renderer import (
 )
 from student import Student
 from texts import TEXT
-
-from scoreboard import Scoreboard
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
@@ -49,7 +48,7 @@ def main() -> None:
     output_dir = Path(args.output)
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    board = Scoreboard.from_files(repo_salt=REPO_SALT)
+    board = load_scoreboard(repo_salt=REPO_SALT)
 
     css = _load_css()
     generated_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -67,7 +66,7 @@ def main() -> None:
         threads_vmax=int(
             (board.points_info.get("threads", {}) or {}).get("variants_max", 1)
         ),
-        thread_tasks=[t.name for t in board.thread_tasks],
+        thread_tasks=board.thread_tasks,
     )
     proc_vmaxes = [task.variants_max for task in board.process_tasks]
     processes_html = render_processes_page(
@@ -98,7 +97,7 @@ def main() -> None:
             threads_vmax=int(
                 (board.points_info.get("threads", {}) or {}).get("variants_max", 1)
             ),
-            thread_tasks=[t.name for t in board.thread_tasks],
+            thread_tasks=board.thread_tasks,
         )
         fname = f"threads_{_slugify(group)}.html"
         (output_dir / fname).write_text(html, encoding="utf-8")

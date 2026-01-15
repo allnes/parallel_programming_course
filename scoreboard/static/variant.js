@@ -129,11 +129,19 @@
     }
   }
 
-  async function fillProcessesTable(repoSalt, vmaxes, showTaskLabels = false) {
+  async function fillProcessesTable(repoSalt, vmaxes, titles) {
     const rows = document.querySelectorAll('tr[data-last]');
     for (const tr of rows) {
       const vs = await computeProcessesVariants(studentFromDataset(tr), repoSalt, vmaxes);
-      if (vs && tr.querySelector('.variant-cell')) tr.querySelector('.variant-cell').innerHTML = vs.join('<br/>');
+      if (vs && tr.querySelector('.variant-cell')) {
+        const labels = Array.isArray(titles) && titles.length === vs.length
+          ? titles
+          : vs.map((_, idx) => `Task ${idx + 1}`);
+        const html = vs
+          .map((val, idx) => `${labels[idx]}: ${val}`)
+          .join('<br/>');
+        tr.querySelector('.variant-cell').innerHTML = html;
+      }
     }
   }
 
@@ -160,7 +168,9 @@
           const pv = await computeProcessesVariants(student, repoSalt, procVmaxes);
           if (!pv) throw new Error('Fill Last, First, Group');
           res.style.color = '#2563eb';
-          res.innerHTML = `${window.variantTexts?.processesVariantLabel || 'Processes'}: <b>${pv[0]} / ${pv[1]} / ${pv[2]}</b>`;
+          const labels = procVmaxes.map((_, idx) => `Task ${idx + 1}`);
+          const variants = pv.map((v, idx) => `${labels[idx]}=${v}`).join(' / ');
+          res.innerHTML = `${window.variantTexts?.processesVariantLabel || 'Processes'}: <b>${variants}</b>`;
         }
       } catch (e) {
         res.textContent = (window.variantTexts?.fillPrompt) || 'Fill Last, First, Group';

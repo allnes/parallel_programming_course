@@ -27,7 +27,7 @@ def render_threads_page(
     texts: dict,
     repo_salt: str,
     threads_vmax: int,
-    thread_tasks: List[str],
+    thread_tasks: List[Any],
 ) -> str:
     env = _environment()
     template = env.get_template("threads_table.html.j2")

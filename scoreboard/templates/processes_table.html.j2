@@ -27,7 +27,7 @@
           {% set mpi_letters = ['S','P','A','E','D','C'] %}
           <th colspan="{{ seq_letters|length + mpi_letters|length + 1 }}" class="task-header">
             <div class="task-title">
-              <span class="task-name">Task {{ loop.index }}</span>
+              <span class="task-name">{{ task.display_name }}</span>
               {% if deadlines[loop.index0] %}<span class="deadline">{{ deadlines[loop.index0] }}</span>{% endif %}
             </div>
           </th>
@@ -81,7 +81,11 @@
     </tbody>
   </table>
   <script>
-    variantCalc.fillProcessesTable({{ repo_salt | tojson | safe }}, {{ proc_vmaxes | tojson | safe }});
+    variantCalc.fillProcessesTable(
+      {{ repo_salt | tojson | safe }},
+      {{ proc_vmaxes | tojson | safe }},
+      {{ proc_tasks | map(attribute='display_name') | list | tojson | safe }}
+    );
   </script>
   </div>
 </body>

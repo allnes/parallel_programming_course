@@ -166,8 +166,10 @@ class Scoreboard:
         tasks: list[ThreadTask] = []
         for cfg in tasks_cfg:
             name = str(cfg.get("name"))
+            display_name = cfg.get("title") or name
             task = ThreadTask(
                 name=name,
+                display_name=display_name,
                 s_points=int(cfg.get("S", 0)),
                 a_points=int(cfg.get("A", 0)),
                 r_points=int(cfg.get("R", 0)),
@@ -187,8 +189,9 @@ class Scoreboard:
             self.deadline_shifts.get("processes_base", {}),
         )
         tasks: list[ProcessTask] = []
-        for cfg, deadline in zip(tasks_cfg, deadlines):
+        for idx, (cfg, deadline) in enumerate(zip(tasks_cfg, deadlines), start=1):
             name = str(cfg.get("name"))
+            display_name = cfg.get("title") or f"Task {idx}"
             mpi_blk = cfg.get("mpi", {})
             seq_blk = cfg.get("seq", {})
 
@@ -206,6 +209,7 @@ class Scoreboard:
 
             task = ProcessTask(
                 name=name,
+                display_name=display_name,
                 mpi_points=mpi_points,
                 seq_points=seq_points,
                 r_points=int(cfg.get("R", 0)),
