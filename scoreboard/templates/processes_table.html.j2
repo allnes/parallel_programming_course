@@ -27,7 +27,7 @@
           {% set mpi_letters = ['S','P','A','E','D','C'] %}
           <th colspan="{{ seq_letters|length + mpi_letters|length + 1 }}" class="task-header">
             <div class="task-title">
-              <span class="task-name">{{ task.name }}</span>
+              <span class="task-name">Task {{ loop.index }}</span>
               {% if deadlines[loop.index0] %}<span class="deadline">{{ deadlines[loop.index0] }}</span>{% endif %}
             </div>
           </th>

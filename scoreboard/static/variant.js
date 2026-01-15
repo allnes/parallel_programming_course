@@ -129,7 +129,7 @@
     }
   }
 
-  async function fillProcessesTable(repoSalt, vmaxes) {
+  async function fillProcessesTable(repoSalt, vmaxes, showTaskLabels = false) {
     const rows = document.querySelectorAll('tr[data-last]');
     for (const tr of rows) {
       const vs = await computeProcessesVariants(studentFromDataset(tr), repoSalt, vmaxes);

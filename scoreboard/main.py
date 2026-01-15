@@ -128,6 +128,7 @@ def main() -> None:
         while len(parts) < 4:
             parts.append("")
         last, first, middle, group = parts[:4]
+        group = group.upper()
         student = Student(
             last_name=last, first_name=first, middle_name=middle, group_number=group
         )

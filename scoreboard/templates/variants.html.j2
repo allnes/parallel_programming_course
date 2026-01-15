@@ -43,7 +43,7 @@
       {{ proc_vmaxes | tojson | safe }}
     );
     variantCalc.fillThreadsTable({{ repo_salt | tojson | safe }}, {{ threads_vmax | int }});
-    variantCalc.fillProcessesTable({{ repo_salt | tojson | safe }}, {{ proc_vmaxes | tojson | safe }});
+    variantCalc.fillProcessesTable({{ repo_salt | tojson | safe }}, {{ proc_vmaxes | tojson | safe }}, true);
   </script>
   </div>
 </body>

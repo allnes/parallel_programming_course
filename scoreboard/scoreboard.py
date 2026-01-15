@@ -35,6 +35,18 @@ from tasks import (
 logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------#
+# Helpers                                                                    #
+# ---------------------------------------------------------------------------#
+
+
+def _normalize_group(group: str | None) -> str:
+    """Normalize group strings to avoid duplicates like ivt-101 vs IVT-101."""
+    if group is None:
+        return ""
+    return str(group).strip().upper()
+
+
+# ---------------------------------------------------------------------------#
 # Row DTOs (for templating)                                                  #
 # ---------------------------------------------------------------------------#
 
@@ -124,6 +136,24 @@ class Scoreboard:
 
         board._build_thread_students(threads_dirs, perf_threads)
         board._build_process_students(processes_dirs, perf_processes)
+
+        # Consistency guard: number of unique identities vs produced rows.
+        thread_identities = board._collect_identities(threads_dirs)
+        proc_identities = board._collect_identities(processes_dirs)
+        if len(thread_identities) != len(board.thread_students):
+            raise RuntimeError(
+                "Threads track mismatch: discovered "
+                f"{len(thread_identities)} unique students across task folders, "
+                f"produced {len(board.thread_students)} rows. "
+                "Ensure each task has valid info.json (last/first/middle/group)."
+            )
+        if len(proc_identities) != len(board.process_students):
+            raise RuntimeError(
+                "Processes track mismatch: discovered "
+                f"{len(proc_identities)} unique students across task folders, "
+                f"produced {len(board.process_students)} rows. "
+                "Likely missing or duplicate student info."
+            )
         return board
 
     def _build_thread_tasks(self) -> list[ThreadTask]:
@@ -243,7 +273,7 @@ class Scoreboard:
                 last_name=student_info.get("last_name", ""),
                 first_name=student_info.get("first_name", ""),
                 middle_name=student_info.get("middle_name", ""),
-                group_number=student_info.get("group_number", ""),
+                group_number=_normalize_group(student_info.get("group_number", "")),
                 student_id=student_info.get("student_id"),
             )
 
@@ -269,42 +299,106 @@ class Scoreboard:
         self, status_map: dict[str, dict[str, str]], perf_map: dict[str, dict]
     ) -> None:
         students_by_identity: dict[str, Student] = {}
+        num_tasks = len(self.process_tasks)
         for dir_name, statuses in status_map.items():
             work_dir = self._resolve_dir(dir_name)
             student_info = load_student_info(work_dir) or {}
+            identity = self._identity_key(student_info)
+            if not identity:
+                logger.warning(
+                    "Skipping task folder with empty student info: %s", work_dir
+                )
+                continue
             student = students_by_identity.get(self._identity_key(student_info))
             if student is None:
                 student = Student(
                     last_name=student_info.get("last_name", ""),
                     first_name=student_info.get("first_name", ""),
                     middle_name=student_info.get("middle_name", ""),
-                    group_number=student_info.get("group_number", ""),
+                    group_number=_normalize_group(student_info.get("group_number", "")),
                     student_id=student_info.get("student_id"),
                 )
                 students_by_identity[student.identity_key()] = student
 
-            try:
-                task_number = int(student_info.get("task_number", 1))
-            except Exception:
-                task_number = 1
+            task_number = self._parse_task_number(student_info, work_dir, identity)
+            self._validate_task_number(task_number, num_tasks, work_dir, identity)
             task_name = f"mpi_task_{task_number}"
             perf_entry = perf_map.get(dir_name, {})
-            submission = ProcessSubmission(
-                task_number=task_number,
-                seq_status=statuses.get("seq"),
-                mpi_status=statuses.get("mpi"),
-                work_dir=work_dir,
-                seq_time=perf_entry.get("seq"),
-                mpi_time=perf_entry.get("mpi"),
-                report_present=(work_dir / "report.md").exists(),
-                seq_copied=self._is_copied("processes", "seq", dir_name),
-                mpi_copied=self._is_copied("processes", "mpi", dir_name),
+            self._ensure_unique_submission(student, task_name, work_dir, identity)
+            submission = self._make_process_submission(
+                task_number, task_name, statuses, perf_entry, work_dir, dir_name
             )
             student.add_process_submission(task_name, submission)
 
         self.process_students = [
             students_by_identity[k] for k in sorted(students_by_identity.keys())
         ]
+
+    def _collect_identities(self, status_map: dict[str, dict[str, str]]) -> set[str]:
+        identities: set[str] = set()
+        for dir_name in status_map.keys():
+            work_dir = self._resolve_dir(dir_name)
+            student_info = load_student_info(work_dir) or {}
+            identity = self._identity_key(student_info)
+            if identity:
+                identities.add(identity)
+        return identities
+
+    # ------------------------------------------------------------------#
+    # Helpers for process student construction                          #
+    # ------------------------------------------------------------------#
+
+    def _parse_task_number(
+        self, student_info: dict, work_dir: Path, identity: str
+    ) -> int:
+        try:
+            return int(student_info.get("task_number", 1))
+        except Exception as exc:  # pragma: no cover - defensive
+            raise RuntimeError(
+                f"Invalid task_number in {work_dir}/info.json for {identity.replace('|', ' ')}"
+            ) from exc
+
+    def _validate_task_number(
+        self, task_number: int, num_tasks: int, work_dir: Path, identity: str
+    ) -> None:
+        if num_tasks <= 0:
+            raise RuntimeError("No process tasks configured; cannot assign task_number")
+        if task_number < 1 or task_number > num_tasks:
+            raise RuntimeError(
+                "task_number out of range in "
+                f"{work_dir}/info.json for {identity.replace('|', ' ')}: "
+                f"{task_number} (allowed 1..{num_tasks})"
+            )
+
+    def _ensure_unique_submission(
+        self, student: Student, task_name: str, work_dir: Path, identity: str
+    ) -> None:
+        if task_name in student.process_submissions:
+            raise RuntimeError(
+                f"Duplicate process task {task_name} for student {identity.replace('|', ' ')} "
+                f"in {work_dir} and {student.process_submissions[task_name].work_dir}"
+            )
+
+    def _make_process_submission(
+        self,
+        task_number: int,
+        task_name: str,
+        statuses: dict[str, str],
+        perf_entry: dict,
+        work_dir: Path,
+        dir_name: str,
+    ) -> ProcessSubmission:
+        return ProcessSubmission(
+            task_number=task_number,
+            seq_status=statuses.get("seq"),
+            mpi_status=statuses.get("mpi"),
+            work_dir=work_dir,
+            seq_time=perf_entry.get("seq"),
+            mpi_time=perf_entry.get("mpi"),
+            report_present=(work_dir / "report.md").exists(),
+            seq_copied=self._is_copied("processes", "seq", dir_name),
+            mpi_copied=self._is_copied("processes", "mpi", dir_name),
+        )
 
     @staticmethod
     def _identity_key(student: dict) -> str:
@@ -313,7 +407,7 @@ class Scoreboard:
                 str(student.get("last_name", "")),
                 str(student.get("first_name", "")),
                 str(student.get("middle_name", "")),
-                str(student.get("group_number", "")),
+                _normalize_group(student.get("group_number", "")),
             ]
         )
 
